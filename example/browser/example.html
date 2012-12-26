@@ -29,6 +29,7 @@
 				
 				$.get('../ex1.enml', function(enml1) {
 					var html1 = enml.HTMLOfENML(enml1);
+					var text1 = enml.PlainTextOfENML(enml1);
 					var elem  = $('#test1');
 					
 					console.log("================ Example 1 (TEXT) ================")
@@ -38,6 +39,10 @@
 					console.log("================ Example 1 (ENML) ================")
 					console.log(enml1)
 					elem.find('.dst').html(html1);
+					
+					
+					console.log(text1)
+					
 				},'text')
 				
 				$.get('../note2.json', function(note2) {
@@ -52,6 +57,7 @@
 					}
 					
 					var html2 = enml.HTMLOfENML(note2.content, resources);
+					var text2 = enml.PlainTextOfENML(note2.content, resources);
 					var elem  = $('#test2');
 					
 					console.log("================ Example 2 (ENML) ================")
@@ -61,6 +67,9 @@
 					console.log("================ Example 2 (HTML) ================")
 					console.log(html2)
 					elem.find('.dst').html(html2);
+					
+					
+					console.log(text2)
 				})
 				
 				

@@ -18,12 +18,16 @@ console.log(enml0)
 
 var enml1 = fs.readFileSync('../ex1.enml','utf8');
 var html1 = enml.HTMLOfENML(enml1);
+var text1 = enml.PlainTextOfENML(enml1);
 
 console.log("================ Example 1 (ENML) ================")
 console.log(enml1)
 
 console.log("================ Example 1 (HTML) ================")
 console.log(html1)
+
+console.log("================ Example 1 (TEXT) ================")
+console.log(text1)
 
 var note2 = fs.readFileSync('../note2.json','utf8');
 var shardId = '48' //HARDCODE...
@@ -36,12 +40,16 @@ for(var i in note2.resources){
 }
 
 var html2 = enml.HTMLOfENML(note2.content, resources);
+var text2 = enml.PlainTextOfENML(note2.content);
 
 console.log("================ Example 2 (ENML) ================")
 console.log(note2.content)
 
 console.log("================ Example 2 (HTML) ================")
 console.log(html2)
+
+console.log("================ Example 2 (TEXT) ================")
+console.log(text2)
 
 
 

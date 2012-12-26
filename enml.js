@@ -1,21 +1,4 @@
-
-	if(typeof exports == 'undefined'){
-	   //Browser Code
-		enml = {};
-		enml.URLOfResource = URLOfResource;
-		enml.ENMLOfPlainText = ENMLOfPlainText;
-		enml.HTMLOfENML = HTMLOfENML;
-	}
-	else{
-
-		//Node JS
-		var XMLWriter = require('./lib/xml-writer');
-		var SaxParser = require('./lib/xml-parser').SaxParser;
-
-		exports.URLOfResource = URLOfResource;
-		exports.ENMLOfPlainText = ENMLOfPlainText;
-		exports.HTMLOfENML = HTMLOfENML;
-	}
+(function() {
 
 	/**
 	 * URLOfResource
@@ -52,7 +35,6 @@
 		return bodyHash;
 	}
 	
-	
 	/**
 	 * ENMLOfPlainText
 	 * @param  { string } text (Plain)
@@ -88,7 +70,24 @@
 
 		return writer.toString();
 	}
-
+  
+  /**
+	 * PlainTextOfENML
+	 * @param  { string } text (ENML)
+	 * @return string - text
+	 */
+	function PlainTextOfENML(enml){
+    
+    var text = enml || '';
+  	text = text.replace(/(<\/(div|ui|li)>)/ig,"\n");
+  	text = text.replace(/(<(li)>)/ig," - ");
+  	text = text.replace(/(<([^>]+)>)/ig,"");
+  	text = text.replace(/(\r\n|\n|\r)/gm," ");
+  	text = text.replace(/(\s+)/gm," ");
+    
+		return text;
+	}
+  
 	/**
 	 * HTMLOfENML
 	 * 	Convert ENML into HTML for showing in web browsers. 
@@ -186,3 +185,28 @@
 		return writer.toString();
 	}	
 
+	if(typeof exports == 'undefined'){
+	  
+	  var XMLWriter = window.XMLWriter;
+		var SaxParser = window.SaxParser;
+	  
+	   //Browser Code
+		window.enml = {};
+		window.enml.URLOfResource = URLOfResource;
+		window.enml.ENMLOfPlainText = ENMLOfPlainText;
+		window.enml.HTMLOfENML = HTMLOfENML;
+		window.enml.PlainTextOfENML = PlainTextOfENML;
+	}
+	else{
+
+		//Node JS
+		var XMLWriter = require('./lib/xml-writer');
+		var SaxParser = require('./lib/xml-parser').SaxParser;
+
+		exports.URLOfResource = URLOfResource;
+		exports.ENMLOfPlainText = ENMLOfPlainText;
+		exports.HTMLOfENML = HTMLOfENML;
+		exports.PlainTextOfENML = PlainTextOfENML;
+	}
+	
+})()
