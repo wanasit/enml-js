@@ -36,7 +36,18 @@ note2 = JSON.parse(note2);
 var resources = {};
 for(var i in note2.resources){
 	var resource = note2.resources[i];
-	resources[resource.data.bodyHash] = enml.URLOfResource(resource.guid, shardId);
+	
+	var hash = ''
+	for(var i=0;i<resource.data.bodyHash.length;i++){
+	  
+	  if(resource.data.bodyHash.charCodeAt(i) < 128 || resource.data.bodyHash.charCodeAt(i) == 65533 )
+	    hash += resource.data.bodyHash.charAt(i)
+	  else
+	    hash += String.fromCharCode(65533) + String.fromCharCode(65533);
+	}
+	
+	console.log(hash)
+	resources[hash] = enml.URLOfResource(resource.guid, shardId);
 }
 
 var html2 = enml.HTMLOfENML(note2.content, resources);

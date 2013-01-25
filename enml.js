@@ -141,13 +141,13 @@
 	        if(!type.match('image')) return;
 	        writer.startElement('img');
 					
-					hash = BodyHashOfENMLHash(hash);
+					hash = BodyHashOfENMLHash(hash);					
 					var resource = resources[hash];
-
+					
 					if(resource) {
 						writer.writeAttribute('src', resource);
 					}
-
+          
 					if(width) writer.writeAttribute('width', width);
 					if(height) writer.writeAttribute('height', height);
 
