@@ -189,7 +189,7 @@
   
   /**
   * TodosOfENML
-  * 	Find all information of Evernote's todos (<en-todo> tags)
+  * 	Extract data of all TODO(s) in ENML text.
   *
   * @param { string } text (ENML)
   * @return { Array [ { text: (string), done: (bool) } ] } - 
@@ -245,12 +245,12 @@
   
   /**
   * CheckTodoInENML
-  * 	Convert ENML into HTML for showing in web browsers. 
+  * 	Rewrite ENML content by changing check/uncheck value of the TODO in given position.
   *
   * @param { string } text (ENML)
   * @param { int }  index 
   * @param { bool } check 
-  * @return string - ENML
+  * @return string - ENML (the new content)
   */
   function CheckTodoInENML(text, index, check){
     
