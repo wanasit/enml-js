@@ -185,7 +185,77 @@
     return writer.toString();
     
   }	
+  
+  
+  /**
+  * TodosOfENML
+  * 	Find all information of Evernote's todos (<en-todo> tags)
+  *
+  * @param { string } text (ENML)
+  * @return { Array [ { text: (string), done: (bool) } ] } - 
+  */
+  function TodosOfENML(text){
+    
+    var todos = [];
+    
+    
+    var parser = new SaxParser(function(cb) {
+      
+      var onTodo = false;
+      var text = null;
+      var checked = false;
+      
+      cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
+        
+        if(elem == 'en-todo'){
+          
+          if(attrs && attrs["checked"]=="true") checked = true;
+          else checked = false;
+          
+          text = "";
+          onTodo = true;
+          
+        }	else if(elem.match(/b|u|i|font|strong/) ){
+          
+        }	else {
+          
+          if(onTodo){
+            todos.push({text: text, checked: checked})
+          }
+          onTodo = false;
+        }
+        
+      });
+      cb.onEndElementNS(function(elem, prefix, uri) {
+        
+      });
+      cb.onCharacters(function(chars) {
+        if(onTodo){
+          text += chars;
+        }
+      });
 
+    });
+
+    return todos;
+  }
+  
+  /**
+  * CheckTodoInENML
+  * 	Convert ENML into HTML for showing in web browsers. 
+  *
+  * @param { string } text (ENML)
+  * @param { int }  index 
+  * @param { bool } check 
+  * @return string - ENML
+  */
+  function CheckTodoInENML(text, index, check){
+    
+    return text
+  }
+  
+  
+  
   if(typeof exports == 'undefined'){
     
     var XMLWriter = window.XMLWriter;
@@ -208,6 +278,8 @@
     exports.ENMLOfPlainText = ENMLOfPlainText;
     exports.HTMLOfENML = HTMLOfENML;
     exports.PlainTextOfENML = PlainTextOfENML;
+    exports.TodosOfENML = TodosOfENML;
+    exports.CheckTodoInENML = CheckTodoInENML;
   }
   
 })()

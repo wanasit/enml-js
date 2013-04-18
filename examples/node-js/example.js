@@ -46,7 +46,6 @@ for(var i in note2.resources){
 	    hash += String.fromCharCode(65533) + String.fromCharCode(65533);
 	}
 	
-	console.log(hash)
 	resources[hash] = enml.URLOfResource(resource.guid, shardId);
 }
 
@@ -64,3 +63,15 @@ console.log(text2)
 
 
 
+var enml3 = fs.readFileSync('../ex3.enml','utf8');
+var todos = enml.TodosOfENML(enml3);
+var enml3_checked = enml.CheckTodoInENML(enml3, 0, true);
+
+console.log("================ Example 3 (ENML) ================")
+console.log(enml3)
+
+console.log("================ Example 3 (TODOS) ===============")
+console.log(todos)
+
+console.log("===== Example 3 with 1st todo checked (ENML) =====")
+console.log(enml3_checked)
