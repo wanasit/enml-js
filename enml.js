@@ -206,19 +206,21 @@
       var checked = false;
       
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
-        
-        if(elem == 'en-todo'){
+        var m = elem.match(/b|u|i|font|strong/) 
+        if(m && elem == m[0]){
           
-          if(attrs && attrs["checked"]=="true") checked = true;
-          else checked = false;
+        }
+        else if(elem == 'en-todo'){
           
+          checked = false;
           text = "";
           onTodo = true;
           
-        }	else if(elem.match(/b|u|i|font|strong/) ){
+          if(attrs) attrs.forEach(function(attr) {
+            if(attr[0] == 'checked' && attr[1] == 'true') checked = true;
+          });
           
         }	else {
-          
           if(onTodo){
             todos.push({text: text, checked: checked})
           }
@@ -252,7 +254,42 @@
   */
   function CheckTodoInENML(text, index, check){
     
-    return text
+    var todo_cout = 0;
+    var writer = new XMLWriter;
+    var parser = new SaxParser(function(cb) {
+
+      cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
+        
+        writer.startElement(elem);
+        
+        
+        if(elem == 'en-todo' && index == todo_cout++){
+          
+          if(attrs) attrs.forEach(function(attr) {
+            if(attr[0] == 'checked') return;
+            writer.writeAttribute(attr[0], attr[1]);
+          });
+          
+          if(check)  writer.writeAttribute('checked', 'true');
+        }else{
+          
+          if(attrs) attrs.forEach(function(attr) {
+            writer.writeAttribute(attr[0], attr[1]);
+          });
+        }
+      });
+      cb.onEndElementNS(function(elem, prefix, uri) {
+
+        writer.endElement();
+      });
+      cb.onCharacters(function(chars) {
+        writer.text(chars);
+      });
+
+    });
+
+    parser.parseString(text);
+    return writer.toString();
   }
   
   

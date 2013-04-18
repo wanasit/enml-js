@@ -66,6 +66,7 @@ console.log(text2)
 var enml3 = fs.readFileSync('../ex3.enml','utf8');
 var todos = enml.TodosOfENML(enml3);
 var enml3_checked = enml.CheckTodoInENML(enml3, 0, true);
+enml3_checked = enml.CheckTodoInENML(enml3_checked, 1,false);
 
 console.log("================ Example 3 (ENML) ================")
 console.log(enml3)
@@ -73,5 +74,5 @@ console.log(enml3)
 console.log("================ Example 3 (TODOS) ===============")
 console.log(todos)
 
-console.log("===== Example 3 with 1st todo checked (ENML) =====")
+console.log("===== Example 3 with check(0)/uncheck(1) (ENML) =====")
 console.log(enml3_checked)
