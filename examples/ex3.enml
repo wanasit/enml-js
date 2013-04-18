@@ -1,0 +1,6 @@
+<en-note style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">
+<en-todo/>Task1
+<div><en-todo checked="true"/>Task2<br/></div>
+<div><en-todo/>With <b>Bold</b> <i>Italic</i> and <u>Underline</u><br/></div>
+<div><u><en-todo/></u>With <font color="#FF2600">Color</font><br/></div>
+</en-note>
