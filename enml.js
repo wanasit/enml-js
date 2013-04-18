@@ -236,7 +236,8 @@
       });
 
     });
-
+    
+    parser.parseString(text);
     return todos;
   }
   
