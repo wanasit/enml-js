@@ -105,6 +105,8 @@
 
     var parser = new SaxParser(function(cb) {
 
+      var mediaTagStarted = false;
+
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
 
         if(elem == 'en-note'){
@@ -141,14 +143,22 @@
 
           if(!embedAllResources && !type.match('image')) return;
 
-          if(type.match('image'))
+          if(type.match('image')) {
             writer.startElement('img');
 
-          else if(type.match('audio')) {
+          } else if(type.match('audio')) {
             writer.startElement('audio');
-            writer.writeAttribute('controls');
+            writer.writeAttribute('controls', '');
             writer.text('Your browser does not support the audio tag.');
-            write.startElement('source');
+            writer.startElement('source');
+            mediaTagStarted = true;
+
+          } else if(type.match('video')) {
+            writer.startElement('video');
+            writer.writeAttribute('controls', '');
+            writer.text('Your browser does not support the video tag.');
+            writer.startElement('source');
+            mediaTagStarted = true;
           }
 
           hash = BodyHashOfENMLHash(hash);
@@ -168,6 +178,7 @@
         if(attrs) attrs.forEach(function(attr) {
           writer.writeAttribute(attr[0], attr[1]);
         });
+
       });
       cb.onEndElementNS(function(elem, prefix, uri) {
 
@@ -179,6 +190,12 @@
 
         }
         else if(elem == 'en-media'){
+          if(mediaTagStarted) {
+            writer.endElement();
+            writer.endElement();
+            writer.writeElement('br', '');
+            mediaTagStarted = false;
+          }
 
         }else{
 
