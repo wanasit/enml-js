@@ -93,15 +93,25 @@
   *	Convert ENML into HTML for showing in web browsers.
   *
   * @param { string } text (ENML)
+<<<<<<< HEAD
   * @param	{ Map <string (hash), string (url) >, Optional } resources
+=======
+  * @param	{ Map <string (hash), url (string) || { url: (string), title: (string) } >, Optional } resources
+  * @param { boolean } embedAllResources
+>>>>>>> embed-medias
   * @return string - HTML
   */
-  function HTMLOfENML(text, resources){
+  function HTMLOfENML(text, resources, embedAllResources){
 
     resources = resources || {};
+    embedAllResources = embedAllResources || false;
     var writer = new XMLWriter();
 
     var parser = new SaxParser(function(cb) {
+
+      var mediaTagStarted = false;
+      var linkTagStarted = false;
+      var linkTitle;
 
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
 
@@ -130,6 +140,7 @@
           var width = 0;
           var height = 0;
 
+
           if(attrs) attrs.forEach(function(attr) {
             if(attr[0] == 'type') type = attr[1];
             if(attr[0] == 'hash') hash = attr[1];
@@ -137,17 +148,45 @@
             if(attr[0] == 'height') height = attr[1];
           });
 
-          if(!type.match('image')) return;
-          writer.startElement('img');
-
           hash = BodyHashOfENMLHash(hash);
           var resource = resources[hash];
+          var resourceUrl = resource.url || resource;
+          var resourceTitle = resource.title || resource.url || '';
 
-          if(resource) {
-            writer.writeAttribute('src', resource);
+          if(!embedAllResources && !type.match('image')) return;
+
+          if(type.match('image')) {
+            writer.startElement('img');
+            writer.writeAttribute('title', resourceTitle);
+
+          } else if(type.match('audio')) {
+            writer.writeElement('p', resourceTitle);
+            writer.startElement('audio');
+            writer.writeAttribute('controls', '');
+            writer.text('Your browser does not support the audio tag.');
+            writer.startElement('source');
+            mediaTagStarted = true;
+
+          } else if(type.match('video')) {
+            writer.writeElement('p', resourceTitle);
+            writer.startElement('video');
+            writer.writeAttribute('controls', '');
+            writer.text('Your browser does not support the video tag.');
+            writer.startElement('source');
+            mediaTagStarted = true;
+          } else {
+            writer.startElement('a');
+            linkTagStarted = true;
+            linkTitle = resourceTitle;
           }
 
-          if(width) writer.writeAttribute('width', width);
+          if(resourceUrl && linkTagStarted) {
+            writer.writeAttribute('href', resourceUrl);
+          } else {
+            writer.writeAttribute('src', resourceUrl);
+          }
+
+          if(width) writer.writeAttribute ('width', width);
           if(height) writer.writeAttribute('height', height);
 
         }	else {
@@ -157,6 +196,7 @@
         if(attrs) attrs.forEach(function(attr) {
           writer.writeAttribute(attr[0], attr[1]);
         });
+
       });
       cb.onEndElementNS(function(elem, prefix, uri) {
 
@@ -168,8 +208,19 @@
 
         }
         else if(elem == 'en-media'){
+          if(mediaTagStarted) {
+            writer.endElement(); // source
+            writer.endElement(); // audio or video
+            writer.writeElement('br', '');
+            mediaTagStarted = false;
 
-        }else{
+          } else if(linkTagStarted) {
+            writer.text(linkTitle);
+            writer.endElement(); // a
+            linkTagStarted = false;
+          }
+
+        } else {
 
           writer.endElement();
         }
