@@ -93,7 +93,7 @@
   *	Convert ENML into HTML for showing in web browsers.
   *
   * @param { string } text (ENML)
-  * @param	{ Map <string (hash), string (url) >, Optional } resources
+  * @param	{ Map <string (hash), url (string) || { url: (string), title: (string) } >, Optional } resources
   * @param { boolean } embedAllResources
   * @return string - HTML
   */
@@ -107,6 +107,7 @@
 
       var mediaTagStarted = false;
       var linkTagStarted = false;
+      var linkTitle;
 
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
 
@@ -135,6 +136,7 @@
           var width = 0;
           var height = 0;
 
+
           if(attrs) attrs.forEach(function(attr) {
             if(attr[0] == 'type') type = attr[1];
             if(attr[0] == 'hash') hash = attr[1];
@@ -142,12 +144,19 @@
             if(attr[0] == 'height') height = attr[1];
           });
 
+          hash = BodyHashOfENMLHash(hash);
+          var resource = resources[hash];
+          var resourceUrl = resource.url || resource;
+          var resourceTitle = resource.title || resource.url || '';
+
           if(!embedAllResources && !type.match('image')) return;
 
           if(type.match('image')) {
             writer.startElement('img');
+            writer.writeAttribute('title', resourceTitle);
 
           } else if(type.match('audio')) {
+            writer.writeElement('p', resourceTitle);
             writer.startElement('audio');
             writer.writeAttribute('controls', '');
             writer.text('Your browser does not support the audio tag.');
@@ -155,6 +164,7 @@
             mediaTagStarted = true;
 
           } else if(type.match('video')) {
+            writer.writeElement('p', resourceTitle);
             writer.startElement('video');
             writer.writeAttribute('controls', '');
             writer.text('Your browser does not support the video tag.');
@@ -163,15 +173,13 @@
           } else {
             writer.startElement('a');
             linkTagStarted = true;
+            linkTitle = resourceTitle;
           }
 
-          hash = BodyHashOfENMLHash(hash);
-          var resource = resources[hash];
-
-          if(resource && linkTagStarted) {
-            writer.writeAttribute('href', resource);
+          if(resourceUrl && linkTagStarted) {
+            writer.writeAttribute('href', resourceUrl);
           } else {
-            writer.writeAttribute('src', resource);
+            writer.writeAttribute('src', resourceUrl);
           }
 
           if(width) writer.writeAttribute ('width', width);
@@ -197,13 +205,14 @@
         }
         else if(elem == 'en-media'){
           if(mediaTagStarted) {
-            writer.endElement();
-            writer.endElement();
+            writer.endElement(); // source
+            writer.endElement(); // audio or video
             writer.writeElement('br', '');
             mediaTagStarted = false;
+
           } else if(linkTagStarted) {
-            writer.text('haha');
-            writer.endElement();
+            writer.text(linkTitle);
+            writer.endElement(); // a
             linkTagStarted = false;
           }
 
