@@ -3,7 +3,7 @@
   /**
   * URLOfResource
   *  Create URL of the resource on Evernote's server
-  * @param  { string } guid 		- the resource's guid
+  * @param  { string } guid - the resource's guid
   * @param  { string } shardId - shard id of the resource owner
   * @return string - URL
   */
@@ -16,21 +16,21 @@
   *  'bodyHash' returned from Evernote API is not equal to 'enmlHash' (hash string in the notes' content).
   *  'enmlHash' is 'bodyHash' in ascii-hex form
   * @param  { string } enmlHash - (Hash string in notes' content)
-  * @return string - bodyHash 		(Binary hash in Evernote API)
+  * @return string - bodyHash (Binary hash in Evernote API)
   */
   function BodyHashOfENMLHash(enmlHash){
 
     var buffer = [];
-    for(var i =0 ; i<enmlHash.length; i += 2) 
-    buffer.push( parseInt(enmlHash[i],16)*16 + parseInt(enmlHash[i+1],16));
+    for(var i =0 ; i<enmlHash.length; i += 2)
+      buffer.push( parseInt(enmlHash[i],16)*16 + parseInt(enmlHash[i+1],16));
 
     var bodyHash = '';
-    for(var i =0 ; i<buffer.length; i ++){
+    for(i =0 ; i<buffer.length; i ++){
       if(buffer[i] >= 128)
       bodyHash += String.fromCharCode(65533);
       else
       bodyHash += String.fromCharCode(buffer[i]);
-    } 
+    }
 
     return bodyHash;
   }
@@ -42,16 +42,16 @@
   */
   function ENMLOfPlainText(text){
 
-    var writer = new XMLWriter;
+    var writer = new XMLWriter();
 
     writer.startDocument = writer.startDocument || writer.writeStartDocument;
-    writer.endDocument 	 = writer.endDocument || writer.writeEndDocument;
+    writer.endDocument = writer.endDocument || writer.writeEndDocument;
     writer.startDocument = writer.startElement || writer.writeStartElement;
     writer.startDocument = writer.endElement || writer.writeEndElement;
 
     writer.startDocument('1.0', 'UTF-8', false);
     writer.write('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">');
-    writer.write("\n")
+    writer.write("\n");
     writer.startElement('en-note');
     writer.writeAttribute('style', 'word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;');
 
@@ -62,7 +62,7 @@
       writer.text(line.replace(/(\r\n|\n|\r)/,''));
       writer.endElement();
 
-      writer.text("\n")
+      writer.text("\n");
     });
 
     writer.endElement();
@@ -90,22 +90,23 @@
 
   /**
   * HTMLOfENML
-  * 	Convert ENML into HTML for showing in web browsers. 
+  *	Convert ENML into HTML for showing in web browsers.
   *
   * @param { string } text (ENML)
-  * @param { string } shard ( shardId )
   * @param	{ Map <string (hash), string (url) >, Optional } resources
+  * @param { boolean } embedAllResources
   * @return string - HTML
   */
-  function HTMLOfENML(text, resources){
+  function HTMLOfENML(text, resources, embedAllResources){
 
     resources = resources || {};
-    var writer = new XMLWriter;
+    embedAllResources = embedAllResources || false;
+    var writer = new XMLWriter();
 
     var parser = new SaxParser(function(cb) {
 
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
-        
+
         if(elem == 'en-note'){
           writer.startElement('html');
           writer.startElement('head');
@@ -138,17 +139,26 @@
             if(attr[0] == 'height') height = attr[1];
           });
 
-          if(!type.match('image')) return;
-          writer.startElement('img');
+          if(!embedAllResources && !type.match('image')) return;
 
-          hash = BodyHashOfENMLHash(hash);					
+          if(type.match('image'))
+            writer.startElement('img');
+
+          else if(type.match('audio')) {
+            writer.startElement('audio');
+            writer.writeAttribute('controls');
+            writer.text('Your browser does not support the audio tag.');
+            write.startElement('source');
+          }
+
+          hash = BodyHashOfENMLHash(hash);
           var resource = resources[hash];
 
           if(resource) {
             writer.writeAttribute('src', resource);
           }
 
-          if(width) writer.writeAttribute('width', width);
+          if(width) writer.writeAttribute ('width', width);
           if(height) writer.writeAttribute('height', height);
 
         }	else {
@@ -183,53 +193,53 @@
 
     parser.parseString(text);
     return writer.toString();
-    
-  }	
-  
-  
+
+  }
+
+
   /**
   * TodosOfENML
-  * 	Extract data of all TODO(s) in ENML text.
+  *	Extract data of all TODO(s) in ENML text.
   *
   * @param { string } text (ENML)
-  * @return { Array [ { text: (string), done: (bool) } ] } - 
+  * @return { Array [ { text: (string), done: (bool) } ] } -
   */
   function TodosOfENML(text){
-    
+
     var todos = [];
-    
-    
+
+
     var parser = new SaxParser(function(cb) {
-      
+
       var onTodo = false;
       var text = null;
       var checked = false;
-      
+
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
-        var m = elem.match(/b|u|i|font|strong/) 
+        var m = elem.match(/b|u|i|font|strong/);
         if(m && elem == m[0]){
-          
+
         }
         else if(elem == 'en-todo'){
-          
+
           checked = false;
           text = "";
           onTodo = true;
-          
+
           if(attrs) attrs.forEach(function(attr) {
             if(attr[0] == 'checked' && attr[1] == 'true') checked = true;
           });
-          
+
         }	else {
           if(onTodo){
-            todos.push({text: text, checked: checked})
+            todos.push({text: text, checked: checked});
           }
           onTodo = false;
         }
-        
+
       });
       cb.onEndElementNS(function(elem, prefix, uri) {
-        
+
       });
       cb.onCharacters(function(chars) {
         if(onTodo){
@@ -238,41 +248,41 @@
       });
 
     });
-    
+
     parser.parseString(text);
     return todos;
   }
-  
+
   /**
   * CheckTodoInENML
-  * 	Rewrite ENML content by changing check/uncheck value of the TODO in given position.
+  *	Rewrite ENML content by changing check/uncheck value of the TODO in given position.
   *
   * @param { string } text (ENML)
-  * @param { int }  index 
-  * @param { bool } check 
+  * @param { int }  index
+  * @param { bool } check
   * @return string - ENML (the new content)
   */
   function CheckTodoInENML(text, index, check){
-    
+
     var todo_cout = 0;
-    var writer = new XMLWriter;
+    var writer = new XMLWriter();
     var parser = new SaxParser(function(cb) {
 
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
-        
+
         writer.startElement(elem);
-        
-        
+
+
         if(elem == 'en-todo' && index == todo_cout++){
-          
+
           if(attrs) attrs.forEach(function(attr) {
             if(attr[0] == 'checked') return;
             writer.writeAttribute(attr[0], attr[1]);
           });
-          
+
           if(check)  writer.writeAttribute('checked', 'true');
         }else{
-          
+
           if(attrs) attrs.forEach(function(attr) {
             writer.writeAttribute(attr[0], attr[1]);
           });
@@ -291,14 +301,16 @@
     parser.parseString(text);
     return writer.toString();
   }
-  
-  
-  
+
+
+
+  var XMLWriter;
+  var SaxParser;
   if(typeof exports == 'undefined'){
-    
-    var XMLWriter = window.XMLWriter;
-    var SaxParser = window.SaxParser;
-    
+
+    XMLWriter = window.XMLWriter;
+    SaxParser = window.SaxParser;
+
     //Browser Code
     window.enml = {};
     window.enml.URLOfResource = URLOfResource;
@@ -307,11 +319,11 @@
     window.enml.PlainTextOfENML = PlainTextOfENML;
   }
   else{
-    
+
     //Node JS
-    var XMLWriter = require('./lib/xml-writer');
-    var SaxParser = require('./lib/xml-parser').SaxParser;
-    
+    XMLWriter = require('./lib/xml-writer');
+    SaxParser = require('./lib/xml-parser').SaxParser;
+
     exports.URLOfResource = URLOfResource;
     exports.ENMLOfPlainText = ENMLOfPlainText;
     exports.HTMLOfENML = HTMLOfENML;
@@ -319,5 +331,5 @@
     exports.TodosOfENML = TodosOfENML;
     exports.CheckTodoInENML = CheckTodoInENML;
   }
-  
-})()
+
+})();
