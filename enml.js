@@ -106,6 +106,7 @@
     var parser = new SaxParser(function(cb) {
 
       var mediaTagStarted = false;
+      var linkTagStarted = false;
 
       cb.onStartElementNS(function(elem, attrs, prefix, uri, namespaces) {
 
@@ -159,12 +160,17 @@
             writer.text('Your browser does not support the video tag.');
             writer.startElement('source');
             mediaTagStarted = true;
+          } else {
+            writer.startElement('a');
+            linkTagStarted = true;
           }
 
           hash = BodyHashOfENMLHash(hash);
           var resource = resources[hash];
 
-          if(resource) {
+          if(resource && linkTagStarted) {
+            writer.writeAttribute('href', resource);
+          } else {
             writer.writeAttribute('src', resource);
           }
 
@@ -195,9 +201,13 @@
             writer.endElement();
             writer.writeElement('br', '');
             mediaTagStarted = false;
+          } else if(linkTagStarted) {
+            writer.text('haha');
+            writer.endElement();
+            linkTagStarted = false;
           }
 
-        }else{
+        } else {
 
           writer.endElement();
         }
