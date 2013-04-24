@@ -140,7 +140,6 @@
           var width = 0;
           var height = 0;
 
-
           if(attrs) attrs.forEach(function(attr) {
             if(attr[0] == 'type') type = attr[1];
             if(attr[0] == 'hash') hash = attr[1];
@@ -150,10 +149,14 @@
 
           hash = BodyHashOfENMLHash(hash);
           var resource = resources[hash];
-          var resourceUrl = resource.url || resource;
-          var resourceTitle = resource.title || resource.url || '';
+          var resourceUrl;
+          var resourceTitle;
+          if(resource) {
+            resourceUrl = resource.url || resource;
+            resourceTitle = resource.title || resource.url || '';
+          }
 
-          if(!embedAllResources && !type.match('image')) return;
+          if((!embedAllResources && !type.match('image')) || !resource) return;
 
           if(type.match('image')) {
             writer.startElement('img');
