@@ -21,17 +21,28 @@
   function BodyHashOfENMLHash(enmlHash){
 
     var buffer = [];
-    for(var i =0 ; i<enmlHash.length; i += 2)
+    
+    for(var i =0 ; i<enmlHash.length; i += 2){
       buffer.push( parseInt(enmlHash[i],16)*16 + parseInt(enmlHash[i+1],16));
-
+    }
+     console.log(buffer)
+    //console.log(buffer_st);
     var bodyHash = '';
     for(i =0 ; i<buffer.length; i ++){
-      if(buffer[i] >= 128)
-      bodyHash += String.fromCharCode(65533);
+      if( buffer[i] < 128 )
+        bodyHash += String.fromCharCode(buffer[i]);
+      else if(buffer[i] < 0xC0)
+        bodyHash += String.fromCharCode(65533); // UNKNOWN
+      else if((i+1 < buffer.length) && ((buffer[i+1] & 0xC0) == 0x80) ){
+        //UTF-8 2-bytes encoding
+        var charcode = (buffer[i] & 0x1f)*64 + (buffer[i+1] & 0x3f);
+        bodyHash += String.fromCharCode(charcode);
+        i += 1;
+      }
       else
-      bodyHash += String.fromCharCode(buffer[i]);
+        bodyHash += String.fromCharCode(65533); // UNKNOWN
     }
-
+    
     return bodyHash;
   }
 
@@ -93,12 +104,8 @@
   *	Convert ENML into HTML for showing in web browsers.
   *
   * @param { string } text (ENML)
-<<<<<<< HEAD
-  * @param	{ Map <string (hash), string (url) >, Optional } resources
-=======
   * @param	{ Map <string (hash), url (string) || { url: (string), title: (string) } >, Optional } resources
   * @param { boolean } embedAllResources
->>>>>>> embed-medias
   * @return string - HTML
   */
   function HTMLOfENML(text, resources, embedAllResources){
@@ -148,6 +155,7 @@
           });
 
           hash = BodyHashOfENMLHash(hash);
+          console.log(hash)
           var resource = resources[hash];
           var resourceUrl;
           var resourceTitle;
@@ -155,7 +163,7 @@
             resourceUrl = resource.url || resource;
             resourceTitle = resource.title || resource.url || '';
           }
-
+          
           if((!embedAllResources && !type.match('image')) || !resource) return;
 
           if(type.match('image')) {
@@ -163,6 +171,8 @@
             writer.writeAttribute('title', resourceTitle);
 
           } else if(type.match('audio')) {
+            
+            
             writer.writeElement('p', resourceTitle);
             writer.startElement('audio');
             writer.writeAttribute('controls', '');
