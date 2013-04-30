@@ -105,10 +105,9 @@
   *
   * @param { string } text (ENML)
   * @param	{ Map <string (hash), url (string) || { url: (string), title: (string) } >, Optional } resources
-  * @param { boolean } embedAllResources
   * @return string - HTML
   */
-  function HTMLOfENML(text, resources, embedAllResources){
+  function HTMLOfENML(text, resources){
 
     resources = resources || {};
     embedAllResources = embedAllResources || false;
@@ -155,17 +154,12 @@
           });
 
           hash = BodyHashOfENMLHash(hash);
-          console.log(hash)
           var resource = resources[hash];
-          var resourceUrl;
-          var resourceTitle;
-          if(resource) {
-            resourceUrl = resource.url || resource;
-            resourceTitle = resource.title || resource.url || '';
-          }
           
-          if((!embedAllResources && !type.match('image')) || !resource) return;
-
+          if(!resource) return;
+          var resourceUrl = resource.url || resource;
+          var resourceTitle = resource.title || resource.url || '';
+          
           if(type.match('image')) {
             writer.startElement('img');
             writer.writeAttribute('title', resourceTitle);
