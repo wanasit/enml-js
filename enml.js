@@ -110,7 +110,6 @@
   function HTMLOfENML(text, resources){
 
     resources = resources || {};
-    embedAllResources = embedAllResources || false;
     var writer = new XMLWriter();
 
     var parser = new SaxParser(function(cb) {
