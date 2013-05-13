@@ -25,8 +25,6 @@
     for(var i =0 ; i<enmlHash.length; i += 2){
       buffer.push( parseInt(enmlHash[i],16)*16 + parseInt(enmlHash[i+1],16));
     }
-     console.log(buffer)
-    //console.log(buffer_st);
     var bodyHash = '';
     for(i =0 ; i<buffer.length; i ++){
       if( buffer[i] < 128 )
