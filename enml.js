@@ -127,7 +127,8 @@
           writer.endElement();
 
           writer.startElement('body');
-          writer.writeAttribute('style', 'word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;');
+          if(attrs[0][0] !== 'style')
+            writer.writeAttribute('style', 'word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;');
         } else if(elem == 'en-todo'){
 
           writer.startElement('input');
@@ -221,6 +222,9 @@
             writer.text(linkTitle);
             writer.endElement(); // a
             linkTagStarted = false;
+
+          } else {
+            writer.endElement();
           }
 
         } else {
