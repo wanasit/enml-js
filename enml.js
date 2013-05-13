@@ -186,6 +186,7 @@
 
           if(resourceUrl && linkTagStarted) {
             writer.writeAttribute('href', resourceUrl);
+            writer.writeAttribute('class', 'en-res-link');
           } else {
             writer.writeAttribute('src', resourceUrl);
           }
