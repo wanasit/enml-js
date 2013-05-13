@@ -127,7 +127,7 @@
           writer.endElement();
 
           writer.startElement('body');
-          if(attrs[0][0] !== 'style')
+          if(!(attrs && attrs[0] && attrs[0][0] && attrs[0][0] === 'style'))
             writer.writeAttribute('style', 'word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;');
         } else if(elem == 'en-todo'){
 
