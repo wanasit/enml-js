@@ -130,7 +130,8 @@
           writer.endElement();
 
           writer.startElement('body');
-          writer.writeAttribute('style', 'word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;');
+          if(!(attrs && attrs[0] && attrs[0][0] && attrs[0][0] === 'style'))
+            writer.writeAttribute('style', 'word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;');
         } else if(elem == 'en-todo'){
 
           writer.startElement('input');
@@ -186,6 +187,7 @@
 
           if(resourceUrl && linkTagStarted) {
             writer.writeAttribute('href', resourceUrl);
+            writer.writeAttribute('class', 'en-res-link');
           } else {
             writer.writeAttribute('src', resourceUrl);
           }
@@ -222,6 +224,9 @@
             writer.text(linkTitle);
             writer.endElement(); // a
             linkTagStarted = false;
+
+          } else {
+            writer.endElement();
           }
 
         } else {
