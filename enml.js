@@ -296,6 +296,11 @@
         }
       });
 
+      cb.onEndDocument(function(){
+        if (onTodo) {
+          todos.push({text: text, checked: checked});
+        }
+      });
     });
 
     parser.parseString(text);
