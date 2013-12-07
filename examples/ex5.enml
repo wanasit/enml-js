@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">
+<en-note>
+<div>Some stuff</div>
+<div><en-todo></en-todo>first todo elem</div>
+<div><en-todo></en-todo>second todo elem<br clear="none"/></div>
+<div><en-todo checked="true"></en-todo>third todo elem</div>
+</en-note>

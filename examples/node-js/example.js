@@ -91,3 +91,11 @@ console.log("================ Example 4 (TEXT) ================")
 console.log(text4)
 
 
+var enml5 = fs.readFileSync('../ex5.enml','utf8');
+var todos = enml.TodosOfENML(enml5);
+
+console.log("================ Example 5 (ENML) ================")
+console.log(enml5)
+
+console.log("================ Example 5 (TODOS) ===============")
+console.log(todos)
