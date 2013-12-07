@@ -99,10 +99,10 @@
 
   /**
   * HTMLOfENML
-  *	Convert ENML into HTML for showing in web browsers.
+  * Convert ENML into HTML for showing in web browsers.
   *
   * @param { string } text (ENML)
-  * @param	{ Map <string (hash), url (string) || { url: (string), title: (string) } >, Optional } resources
+  * @param  { Map <string (hash), url (string) || { url: (string), title: (string) } >, Optional } resources
   * @return string - HTML
   */
   function HTMLOfENML(text, resources){
@@ -137,7 +137,7 @@
           writer.startElement('input');
           writer.writeAttribute('type', 'checkbox');
 
-        }	else if(elem == 'en-media'){
+        } else if(elem == 'en-media'){
 
           var type = null;
           var hash = null;
@@ -195,7 +195,7 @@
           if(width) writer.writeAttribute ('width', width);
           if(height) writer.writeAttribute('height', height);
 
-        }	else {
+        } else {
           writer.startElement(elem);
         }
 
@@ -248,7 +248,7 @@
 
   /**
   * TodosOfENML
-  *	Extract data of all TODO(s) in ENML text.
+  * Extract data of all TODO(s) in ENML text.
   *
   * @param { string } text (ENML)
   * @return { Array [ { text: (string), done: (bool) } ] } -
@@ -279,7 +279,7 @@
             if(attr[0] == 'checked' && attr[1] == 'true') checked = true;
           });
 
-        }	else {
+        } else {
           if(onTodo){
             todos.push({text: text, checked: checked});
           }
@@ -309,7 +309,7 @@
 
   /**
   * CheckTodoInENML
-  *	Rewrite ENML content by changing check/uncheck value of the TODO in given position.
+  * Rewrite ENML content by changing check/uncheck value of the TODO in given position.
   *
   * @param { string } text (ENML)
   * @param { int }  index
@@ -356,8 +356,6 @@
     return writer.toString();
   }
 
-
-
   var XMLWriter;
   var SaxParser;
   if(typeof exports == 'undefined'){
@@ -367,10 +365,12 @@
 
     //Browser Code
     window.enml = {};
-    window.enml.URLOfResource = URLOfResource;
+    window.enml.URLOfResource   = URLOfResource;
     window.enml.ENMLOfPlainText = ENMLOfPlainText;
-    window.enml.HTMLOfENML = HTMLOfENML;
+    window.enml.HTMLOfENML      = HTMLOfENML;
     window.enml.PlainTextOfENML = PlainTextOfENML;
+    window.enml.TodosOfENML     = TodosOfENML;
+    window.enml.CheckTodoInENML = CheckTodoInENML;
   }
   else{
 
@@ -378,11 +378,11 @@
     XMLWriter = require('./lib/xml-writer');
     SaxParser = require('./lib/xml-parser').SaxParser;
 
-    exports.URLOfResource = URLOfResource;
+    exports.URLOfResource   = URLOfResource;
     exports.ENMLOfPlainText = ENMLOfPlainText;
-    exports.HTMLOfENML = HTMLOfENML;
+    exports.HTMLOfENML      = HTMLOfENML;
     exports.PlainTextOfENML = PlainTextOfENML;
-    exports.TodosOfENML = TodosOfENML;
+    exports.TodosOfENML     = TodosOfENML;
     exports.CheckTodoInENML = CheckTodoInENML;
   }
 
