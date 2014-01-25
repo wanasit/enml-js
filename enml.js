@@ -88,11 +88,12 @@
   function PlainTextOfENML(enml){
 
     var text = enml || '';
-    text = text.replace(/(<\/(div|ui|li)>)/ig,"\n");
+    text = text.replace(/(\r\n|\n|\r)/gm," ");
+    text = text.replace(/(<\/(div|ui|li|p|table|tr|dl)>)/ig,"\n");
+    text = text.replace(/^\s/gm,"");
     text = text.replace(/(<(li)>)/ig," - ");
     text = text.replace(/(<([^>]+)>)/ig,"");
-    text = text.replace(/(\r\n|\n|\r)/gm," ");
-    text = text.replace(/(\s+)/gm," ");
+   	text = text.trim()
 
     return text;
   }
