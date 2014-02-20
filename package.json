@@ -11,5 +11,10 @@
       "lib"      : "./lib", 
       "examples" : "./examples"
     },
-  "main": "./enml"
+  "main": "./enml",
+  "devDependencies": {
+    "evernote": "latest",
+    "should": "3.1.X",
+    "mocha": "1.17.X"
+  }
 }
