@@ -1,50 +1,6 @@
 (function() {
 
   /**
-  * URLOfResource
-  *  Create URL of the resource on Evernote's server
-  * @param  { string } guid - the resource's guid
-  * @param  { string } shardId - shard id of the resource owner
-  * @return string - URL
-  */
-  function URLOfResource(guid, shardId){
-    return 'https://www.evernote.com/shard/'+shardId+'/res/'+guid;
-  }
-
-  /**
-  * enmlHashToBodyHash
-  *  'bodyHash' returned from Evernote API is not equal to 'enmlHash' (hash string in the notes' content).
-  *  'enmlHash' is 'bodyHash' in ascii-hex form
-  * @param  { string } enmlHash - (Hash string in notes' content)
-  * @return string - bodyHash (Binary hash in Evernote API)
-  */
-  function BodyHashOfENMLHash(enmlHash){
-
-    var buffer = [];
-    
-    for(var i =0 ; i<enmlHash.length; i += 2){
-      buffer.push( parseInt(enmlHash[i],16)*16 + parseInt(enmlHash[i+1],16));
-    }
-    var bodyHash = '';
-    for(i =0 ; i<buffer.length; i ++){
-      if( buffer[i] < 128 )
-        bodyHash += String.fromCharCode(buffer[i]);
-      else if(buffer[i] < 0xC0)
-        bodyHash += String.fromCharCode(65533); // UNKNOWN
-      else if((i+1 < buffer.length) && ((buffer[i+1] & 0xC0) == 0x80) ){
-        //UTF-8 2-bytes encoding
-        var charcode = (buffer[i] & 0x1f)*64 + (buffer[i+1] & 0x3f);
-        bodyHash += String.fromCharCode(charcode);
-        i += 1;
-      }
-      else
-        bodyHash += String.fromCharCode(65533); // UNKNOWN
-    }
-    
-    return bodyHash;
-  }
-
-  /**
   * ENMLOfPlainText
   * @param  { string } text (Plain)
   * @return string - ENML
@@ -98,6 +54,59 @@
     return text;
   }
 
+
+  function base64ArrayBuffer(bytes) {
+    var base64    = ''
+    var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    var byteLength    = bytes.byteLength
+    var byteRemainder = byteLength % 3
+    var mainLength    = byteLength - byteRemainder
+   
+    var a, b, c, d
+    var chunk
+   
+    // Main loop deals with bytes in chunks of 3
+    for (var i = 0; i < mainLength; i = i + 3) {
+      // Combine the three bytes into a single integer
+      chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+   
+      // Use bitmasks to extract 6-bit segments from the triplet
+      a = (chunk & 16515072) >> 18 // 16515072 = (2^6 - 1) << 18
+      b = (chunk & 258048)   >> 12 // 258048   = (2^6 - 1) << 12
+      c = (chunk & 4032)     >>  6 // 4032     = (2^6 - 1) << 6
+      d = chunk & 63               // 63       = 2^6 - 1
+   
+      // Convert the raw binary segments to the appropriate ASCII encoding
+      base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d]
+    }
+   
+    // Deal with the remaining bytes and padding
+    if (byteRemainder == 1) {
+      chunk = bytes[mainLength]
+   
+      a = (chunk & 252) >> 2 // 252 = (2^6 - 1) << 2
+   
+      // Set the 4 least significant bits to zero
+      b = (chunk & 3)   << 4 // 3   = 2^2 - 1
+   
+      base64 += encodings[a] + encodings[b] + '=='
+    } else if (byteRemainder == 2) {
+      chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1]
+   
+      a = (chunk & 64512) >> 10 // 64512 = (2^6 - 1) << 10
+      b = (chunk & 1008)  >>  4 // 1008  = (2^6 - 1) << 4
+   
+      // Set the 2 least significant bits to zero
+      c = (chunk & 15)    <<  2 // 15    = 2^4 - 1
+   
+      base64 += encodings[a] + encodings[b] + encodings[c] + '='
+    }
+    
+    return base64
+  }
+
+
   /**
   * HTMLOfENML
   * Convert ENML into HTML for showing in web browsers.
@@ -108,9 +117,19 @@
   */
   function HTMLOfENML(text, resources){
 
-    resources = resources || {};
-    var writer = new XMLWriter();
+    resources = resources || [];
 
+    var resource_map = {}
+    resources.forEach(function(resource){
+
+      var hex = [].map.call( resource.data.bodyHash, 
+        function(v) { str = v.toString(16); 
+        return str.length < 2 ? "0" + str : str;  }).join("");
+
+      resource_map[hex] = resource;
+    })
+
+    var writer = new XMLWriter();
     var parser = new SaxParser(function(cb) {
 
       var mediaTagStarted = false;
@@ -152,14 +171,13 @@
             if(attr[0] == 'height') height = attr[1];
           });
 
-          hash = BodyHashOfENMLHash(hash);
-          var resource = resources[hash];
+          var resource = resource_map[hash];
           
           if(!resource) return;
-          var resourceUrl = resource.url || resource;
-          var resourceTitle = resource.title || resource.url || '';
+          var resourceTitle = resource.title || '';
           
           if(type.match('image')) {
+
             writer.startElement('img');
             writer.writeAttribute('title', resourceTitle);
 
@@ -185,12 +203,11 @@
             linkTagStarted = true;
             linkTitle = resourceTitle;
           }
-
-          if(resourceUrl && linkTagStarted) {
-            writer.writeAttribute('href', resourceUrl);
-            writer.writeAttribute('class', 'en-res-link');
-          } else {
-            writer.writeAttribute('src', resourceUrl);
+          
+          if(resource.data.body) {
+            var b64encoded = base64ArrayBuffer(resource.data.body);
+            var src = 'data:'+type+';base64,'+b64encoded;
+            writer.writeAttribute('src', src)
           }
 
           if(width) writer.writeAttribute ('width', width);
@@ -366,7 +383,7 @@
 
     //Browser Code
     window.enml = {};
-    window.enml.URLOfResource   = URLOfResource;
+
     window.enml.ENMLOfPlainText = ENMLOfPlainText;
     window.enml.HTMLOfENML      = HTMLOfENML;
     window.enml.PlainTextOfENML = PlainTextOfENML;
@@ -379,7 +396,6 @@
     XMLWriter = require('./lib/xml-writer');
     SaxParser = require('./lib/xml-parser').SaxParser;
 
-    exports.URLOfResource   = URLOfResource;
     exports.ENMLOfPlainText = ENMLOfPlainText;
     exports.HTMLOfENML      = HTMLOfENML;
     exports.PlainTextOfENML = PlainTextOfENML;
