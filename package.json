@@ -15,6 +15,7 @@
   "devDependencies": {
     "evernote": "latest",
     "should": "3.1.X",
-    "mocha": "1.17.X"
+    "mocha": "1.17.X",
+    "async": "0.2.X"
   }
 }
