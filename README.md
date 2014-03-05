@@ -8,14 +8,10 @@ enml-js
 > enml.ENMLOfPlainText("Hello\nWorld!!")
 "<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">\n<en-note style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;"><div>Hello</div>\n<div>World!!</div>\n</en-note>"
 
-
 > enml.PlainTextOfENML('<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">\n<en-note style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;"><div>Hello</div>\n<div>World!!</div>\n</en-note>')
 "Hello\nWorld!!"
 
 ```
-
-INSTALLATION
-============
 
 ### Node.js
 
