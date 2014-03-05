@@ -77,13 +77,13 @@
     var lines = text.match(/^.*((\r\n|\n|\r)|$)/gm);
 
     lines.forEach(function(line) {
+      writer.text("\n");
       writer.startElement('div');
       writer.text(line.replace(/(\r\n|\n|\r)/,''));
       writer.endElement();
-
-      writer.text("\n");
     });
 
+    writer.text("\n");
     writer.endElement();
     writer.endDocument();
 
